@@ -2,6 +2,14 @@ import BoardState;
 
 public static class Tests {
 
+    public static void runAllTests() {
+
+        //tests return true if the code being tested works
+        //false, if the code failed
+
+        return;
+    }
+
     public static boolean testSetupInitialBoard() {
 
         //ensures that the correct IDs are placed into 
@@ -54,6 +62,61 @@ public static class Tests {
         //place a piece, them move the piece
         boardState.positions[0][0] = 1;
         boardState.move(0, 0, 7, 7);
+
+        //make sure that the piece isn't in the old location
+        //and that it IS is the new location
+        if (
+            boardState.positions[0][0] == 1 ||
+            boardState.positions[7][7] == 0
+            ) {
+                return false;
+            }
+
+        return true;
+    }
+
+    public static boolean testExplode() {
+        BoardState boardState = new BoardState();
+        //setup a 9x9 square to explode
+        //0 = empty, 6 = pawn, 5 = queen
+        //
+        // 6 6 6
+        // 5 6 5  
+        // 5 0 0
+        boardState.positions[0][0] = 6;
+        boardState.positions[0][1] = 6;
+        boardState.positions[0][2] = 6;
+        boardState.positions[1][0] = 5;
+        boardState.positions[1][1] = 6;
+        boardState.positions[1][2] = 5;
+        boardState.positions[2][0] = 5;
+        boardState.positions[2][1] = 0;
+        boardState.positions[2][2] = 0;
+
+        //cause an explosion and make sure that the queens
+        //were removed and that the pawns were not
+        //the pawn in the middle should be removed though
+        boardState.explode(1, 1);
+        if (
+            boardState.positions[0][0] != 6 ||
+            boardState.positions[0][1] != 6 ||
+            boardState.positions[0][2] != 6 ||
+            boardState.positions[1][0] != 0 ||
+            boardState.positions[1][1] != 0 ||
+            boardState.positions[1][2] != 0 ||
+            boardState.positions[2][0] != 0 ||
+            boardState.positions[2][1] != 0 ||
+            boardState.positions[2][2] != 0 
+        ) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static boolean testCheckVictory() {
+
+        
 
         return true;
     }
