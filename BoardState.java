@@ -1,11 +1,10 @@
-package atomicchessai;
-
 import java.util.ArrayList;
 
 public class BoardState {
     public Move initiatingMove;
     public BoardState parent;
     public int[][] positions;
+    public ArrayList<Move> validMoves;
     public boolean whitesTurn;
     //used to determine if a player can castle
     public boolean whiteKingMoved;
@@ -14,6 +13,20 @@ public class BoardState {
     public boolean blackRook0Moved;
     public boolean whiteRook7Moved;
     public boolean blackRook7Moved;
+
+    public BoardState() {
+        //initialize variables in default states
+        positions = new int[8][8];
+        validMoves = new ArrayList<Move>();
+        whitesTurn = true;
+        whiteKingMoved = false;
+        blackKingMoved = false;
+        whiteRook0Moved = false;
+        whiteRook7Moved = false;
+        blackRook0Moved = false;
+        blackRook7Moved = false;
+        return;
+    }
 
     public void setupInitialBoard() {
         return;
@@ -47,8 +60,8 @@ public class BoardState {
         return true;
     }
 
-    public ArrayList<Move> generateValidMoves() {
-        return new ArrayList<Move>();
+    public void generateValidMoves() {
+        return;
     }
 
     private ArrayList<Move> removeSuicideMoves(ArrayList<Move> moves) {
@@ -81,6 +94,10 @@ public class BoardState {
 
     private ArrayList<Move> directionalMoves (int x, int y, int dirX, int dirY) {
         return new ArrayList<Move>();
+    }
+
+    public boolean containsMove(ArrayList<Move> arrayList, Move move) {
+        return true;
     }
 
 
