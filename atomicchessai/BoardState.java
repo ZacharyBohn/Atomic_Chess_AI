@@ -1,3 +1,7 @@
+package atomicchessai;
+
+import java.util.ArrayList;
+
 public class BoardState {
     public Move initiatingMove;
     public BoardState parent;
