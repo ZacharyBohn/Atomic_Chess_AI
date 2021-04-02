@@ -1,5 +1,5 @@
 import java.util.ArrayList;
-
+import manifold.ext.api.Jailbreak;
 
 public class Tests {
 
@@ -415,8 +415,34 @@ public class Tests {
         return true;
     }
 
-    //NOT IMPLEMENTED
     public static boolean testPawnMoves() {
+
+        BoardState boardState = new BoardState();
+        boardState.positions = new int[8][8];
+        //place white pawn in its initial square
+        boardState.positions[0][6] = 7;
+        //place the black pawn on a square other than its initial one
+        boardState.positions[0][2] = 6;
+        //create something for the black pawn to attack
+        boardState.positions[1][3] = 12;
+        ArrayList<Move> validMoves = boardState.generateValidMoves();
+        //create the two valid moves for the white pawn
+        Move move1 = new Move(0, 6, 0, 5);
+        Move move2 = new Move(0, 6, 0, 4);
+        //black pawn moves
+        Move move3 = new Move(0, 2, 0, 3);
+        Move move4 = new Move(0, 2, 1, 3);
+
+        //now valid moves should contain all 4 of the explicityly defined moves
+        //and no other moves
+        if (validMoves.size() != 4 ||
+            boardState.containsMove(validMoves, move1) == false ||
+            boardState.containsMove(validMoves, move2) == false ||
+            boardState.containsMove(validMoves, move3) == false ||
+            boardState.containsMove(validMoves, move4) == false) {
+                return false;
+            }
+
         return true;
     }
 
