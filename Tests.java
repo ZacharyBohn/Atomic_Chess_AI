@@ -446,48 +446,106 @@ public class Tests {
         return true;
     }
 
-    //NOT IMPLEMENTED
     public static boolean testRookMoves() {
+
+        BoardState boardState = new BoardState();
+        boardState.positions = new int[8][8];
+        boardState.positions[0][0] = 8;
+        boardState.generateValidMoves();
+        if (boardState.validMoves != 14) {
+            return false;
+        }
+
         return true;
     }
 
-    //NOT IMPLEMENTED
     public static boolean testKnightMoves() {
+
+        BoardState boardState = new BoardState();
+        boardState.positions = new int[8][8];
+        boardState.positions[4][3] = 9;
+        boardState.generateValidMoves();
+        if (boardState.validMoves != 8) {
+            return false;
+        }
+
         return true;
     }
 
-    //NOT IMPLEMENTED
     public static boolean testBishopMoves() {
+
+        BoardState boardState = new BoardState();
+        boardState.positions = new int[8][8];
+        boardState.positions[1][1] = 10;
+        boardState.generateValidMoves();
+        if (boardState.validMoves != 9) {
+            return false;
+        }
+
         return true;
     }
 
-    //NOT IMPLEMENTED
     public static boolean testQueenMoves() {
+
+        BoardState boardState = new BoardState();
+        boardState.positions = new int[8][8];
+        boardState.positions[0][0] = 12;
+        boardState.generateValidMoves();
+        if (boardState.validMoves != 21) {
+            return false;
+        }
+
         return true;
     }
 
-    //NOT IMPLEMENTED
     public static boolean testKingMoves() {
+
+        BoardState boardState = new BoardState();
+        boardState.positions = new int[8][8];
+        boardState.positions[3][3] = 11;
+        boardState.generateValidMoves();
+        if (boardState.validMoves != 8) {
+            return false;
+        }
+
         return true;
     }
 
-    //NOT IMPLEMENTED
     public static boolean testDirectionalMoves() {
+
+        BoardState boardState = new BoardState();
+        ArrayList<Move> moves = boardState.directionalMoves(0, 0, 1, 0);
+        if (moves.size() != 7) {
+            return false;
+        }
+        ArrayList<Move> moves2 = boardState.directionalMoves(7, 7, -1, -1);
+        if (moves2.size() != 7) {
+            return false;
+        }
+
         return true;
     }
 
-    //NOT IMPLEMENTED
     public static boolean testContainsMove() {
+
+        ArrayList<Move> moves = new ArrayList<Move>();
+        Move move = new Move(0, 0, 1 ,1);
+        moves.add(move);
+        BoardState boardState = new BoardState();
+        if (boardState.containsMove(moves, move) == false) {
+            return false;
+        }
+
         return true;
     }
 
     //NOT IMPLEMENTED
-    public static boolean testSaveToDisk() {
+    public static boolean testSaveAndRead() {
+
+        //save something to the disk
+        //then read it and see if it is the same
+
         return true;
     }
 
-    //NOT IMPLEMENTED
-    public static boolean testReadFromDisk() {
-        return true;
-    }
 }
