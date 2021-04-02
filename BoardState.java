@@ -56,7 +56,7 @@ public class BoardState {
         return true;
     }
 
-    public boolean opponentMoveTo(Move move) {
+    public boolean opponentMoveTo(int x, int y)) {
         return true;
     }
 

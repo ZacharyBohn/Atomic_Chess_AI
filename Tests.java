@@ -173,7 +173,7 @@ public class Tests {
 
     public static boolean testExplode() {
         BoardState boardState = new BoardState();
-        if (boardState.positions == null) { return false; }
+        boardState.positions = new int[8][8];
         //setup a 9x9 square to explode
         //0 = empty, 6 = pawn, 5 = queen
         //
@@ -223,7 +223,7 @@ public class Tests {
         //so technically both white and black should be considered
         //victorious
         BoardState boardState = new BoardState();
-        if (boardState.positions == null) { return false; }
+        boardState.positions = new int[8][8];
         //check for black is checkmate
         boardState.whitesTurn = false;
         if (boardState.checkVictory() == false) {
@@ -292,7 +292,7 @@ public class Tests {
     public static boolean testGenerateValidMoves() {
 
         BoardState boardState = new BoardState();
-        if (boardState.positions == null) { return false; }
+        boardState.positions = new int[8][8];
         //there should be no valid moves before any pieces are on the board
         boardState.generateValidMoves();
         if (boardState.validMoves.size() != 0) {
@@ -343,13 +343,75 @@ public class Tests {
         return true;
     }
 
-    //NOT IMPLEMENTED
     public static boolean testOpponentMoveTo() {
+
+        //setup a board state instance with only a few
+        //moves for black with a couple obscure rules coming
+        //into play
+        BoardState boardState = new BoardState();
+        boardState.positions = new int[8][8];
+        //set a black king and black rook on the board
+        //black king = 4
+        //black rook = 1
+        boardState.positions[0][0] = 4;
+        boardState.positions[1][0] = 1;
+        //place a white king, white pawn and white rook on the board
+        //white king = 11
+        //white pawn = 7
+        //white rook = 8
+        boardState.positions[1][7] = 11;
+        boardState.positions[1][6] = 7;
+        boardState.positions[2][0] = 8;
+        //black should be able to move to 4 squares
+        //1,6
+        //2,0
+        //1,1
+        //0,1
+        boardState.whitesTurn = true;
+        for (int x=0; x<8; x++) {
+            for (int y=0; y<8; y++) {
+                //check if the current square should be movable to by black
+                if (x == 1 && y == 6 && boardState.opponentMoveTo(x, y) == false) {
+                    return false;
+                }
+                else if (x == 2 && y == 0 && boardState.opponentMoveTo(x, y) == false) {
+                    return false;
+                }
+                else if (x == 1 && y == 1 && boardState.opponentMoveTo(x, y) == false) {
+                    return false;
+                }
+                else if (x == 0 && y == 1 && boardState.opponentMoveTo(x, y) == false) {
+                    return false;
+                }
+                else if (boardState.opponentMoveTo(x, y) == true) {
+                    //black should NOT be able to move here
+                    return false;
+                }
+            }
+        }
+
         return true;
     }
 
-    //NOT IMPLEMENTED
     public static boolean testLookAhead() {
+
+        BoardState boardState = new BoardState();
+        boardState.setupInitialBoard();
+        boardState.whitesTurn = true;
+        if (boardState.lookAhead(2) == true ||
+            boardState.lookAhead(3) == false ||
+            boardState.lookAhead(4) == false) {
+                //then look ahead is not functioning correctly
+                return false;
+            }
+        
+        //move the white queen to a position to blow up the black king
+        boardState.positions[3][7] = 0;
+        boardState.positions[2][3] = 12;
+        if (boardState.lookAhead(1) == false) {
+            return false;
+        }
+
         return true;
     }
 
@@ -385,6 +447,11 @@ public class Tests {
 
     //NOT IMPLEMENTED
     public static boolean testDirectionalMoves() {
+        return true;
+    }
+
+    //NOT IMPLEMENTED
+    public static boolean testContainsMove() {
         return true;
     }
 
