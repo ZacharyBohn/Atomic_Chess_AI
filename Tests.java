@@ -1,5 +1,9 @@
 import java.util.ArrayList;
-import manifold.ext.api.Jailbreak;
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
+import java.io.IOException;
 
 public class Tests {
 
@@ -7,7 +11,6 @@ public class Tests {
         runAllTests();
     }
 
-    //NOT IMPLEMENTED
     public static void runAllTests() {
 
         //tests return true if the code being tested works
@@ -85,18 +88,18 @@ public class Tests {
         else { System.out.println("test failed"); }
         System.out.println();
 
-        System.out.println("Testing directionalMoves()");
-        if (testDirectionalMoves()) { System.out.println("ok"); }
+        System.out.println("Testing containsMove()");
+        if (testContainsMove()) { System.out.println("ok"); }
         else { System.out.println("test failed"); }
         System.out.println();
 
-        System.out.println("Testing saveToDisk()");
-        if (testSaveToDisk()) { System.out.println("ok"); }
+        System.out.println("Testing saveState(), loadState(), serialize() and deserialize()");
+        if (testSaveAndRead()) { System.out.println("ok"); }
         else { System.out.println("test failed"); }
         System.out.println();
 
-        System.out.println("Testing readFromDisk()");
-        if (testReadFromDisk()) { System.out.println("ok"); }
+        System.out.println("Testing branch()");
+        if (testBranch()) { System.out.println("ok"); }
         else { System.out.println("test failed"); }
         System.out.println();
 
@@ -425,7 +428,7 @@ public class Tests {
         boardState.positions[0][2] = 6;
         //create something for the black pawn to attack
         boardState.positions[1][3] = 12;
-        ArrayList<Move> validMoves = boardState.generateValidMoves();
+        boardState.generateValidMoves();
         //create the two valid moves for the white pawn
         Move move1 = new Move(0, 6, 0, 5);
         Move move2 = new Move(0, 6, 0, 4);
@@ -435,11 +438,11 @@ public class Tests {
 
         //now valid moves should contain all 4 of the explicityly defined moves
         //and no other moves
-        if (validMoves.size() != 4 ||
-            boardState.containsMove(validMoves, move1) == false ||
-            boardState.containsMove(validMoves, move2) == false ||
-            boardState.containsMove(validMoves, move3) == false ||
-            boardState.containsMove(validMoves, move4) == false) {
+        if (boardState.validMoves.size() != 4 ||
+            boardState.containsMove(boardState.validMoves, move1) == false ||
+            boardState.containsMove(boardState.validMoves, move2) == false ||
+            boardState.containsMove(boardState.validMoves, move3) == false ||
+            boardState.containsMove(boardState.validMoves, move4) == false) {
                 return false;
             }
 
@@ -452,7 +455,7 @@ public class Tests {
         boardState.positions = new int[8][8];
         boardState.positions[0][0] = 8;
         boardState.generateValidMoves();
-        if (boardState.validMoves != 14) {
+        if (boardState.validMoves.size() != 14) {
             return false;
         }
 
@@ -465,7 +468,7 @@ public class Tests {
         boardState.positions = new int[8][8];
         boardState.positions[4][3] = 9;
         boardState.generateValidMoves();
-        if (boardState.validMoves != 8) {
+        if (boardState.validMoves.size() != 8) {
             return false;
         }
 
@@ -478,7 +481,7 @@ public class Tests {
         boardState.positions = new int[8][8];
         boardState.positions[1][1] = 10;
         boardState.generateValidMoves();
-        if (boardState.validMoves != 9) {
+        if (boardState.validMoves.size() != 9) {
             return false;
         }
 
@@ -491,7 +494,7 @@ public class Tests {
         boardState.positions = new int[8][8];
         boardState.positions[0][0] = 12;
         boardState.generateValidMoves();
-        if (boardState.validMoves != 21) {
+        if (boardState.validMoves.size() != 21) {
             return false;
         }
 
@@ -504,22 +507,7 @@ public class Tests {
         boardState.positions = new int[8][8];
         boardState.positions[3][3] = 11;
         boardState.generateValidMoves();
-        if (boardState.validMoves != 8) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public static boolean testDirectionalMoves() {
-
-        BoardState boardState = new BoardState();
-        ArrayList<Move> moves = boardState.directionalMoves(0, 0, 1, 0);
-        if (moves.size() != 7) {
-            return false;
-        }
-        ArrayList<Move> moves2 = boardState.directionalMoves(7, 7, -1, -1);
-        if (moves2.size() != 7) {
+        if (boardState.validMoves.size() != 8) {
             return false;
         }
 
@@ -535,15 +523,45 @@ public class Tests {
         if (boardState.containsMove(moves, move) == false) {
             return false;
         }
+        //also check for false positives
+        if (boardState.containsMove(moves, new Move(4, 4, 5, 4)) == true) {
+            return false;
+        }
 
         return true;
     }
 
-    //NOT IMPLEMENTED
     public static boolean testSaveAndRead() {
 
-        //save something to the disk
-        //then read it and see if it is the same
+        //create a board state instance and add a child board state
+        //to it in the knownMoves array list
+        Ai ai = new Ai();
+        BoardState boardState1 = new BoardState();
+        BoardState boardState2 = new BoardState();
+        //variables to check after de-serialization
+        boardState1.whiteKingMoved = true;
+        boardState2.blackKingMoved = true;
+        boardState1.knownMoves.add(boardState2);
+        ai.boardStateMap = boardState1;
+        ai.saveState();
+        ai = new Ai();
+        ai.loadState();
+        if (ai.boardStateMap == null) { return false; }
+        if (ai.boardStateMap.whiteKingMoved == false) { return false; }
+        if (ai.boardStateMap.knownMoves.size() == 0) { return false; }
+        if (ai.boardStateMap.knownMoves.get(0).blackKingMoved == false) { return false; }
+
+        return true;
+    }
+
+    public static boolean testBranch() {
+
+        BoardState boardState = new BoardState();
+        Move branchingMove = new Move(0, 6, 0, 5);
+        boardState.branch(branchingMove);
+        if (boardState.knownMoves.size() != 1) { return false; }
+        if (boardState.knownMoves.get(0).initiatingMove == null) { return false; }
+        if (boardState.knownMoves.get(0).initiatingMove.equals(branchingMove) == false) { return false; }
 
         return true;
     }

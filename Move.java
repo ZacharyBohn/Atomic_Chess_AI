@@ -12,5 +12,23 @@ public class Move {
         toY = ToY;
         return;
     }
+
+    public boolean equals(Move move) {
+
+        if (fromX == move.fromX &&
+            fromY == move.fromY &&
+            toX == move.toX &&
+            toY == move.toY) { return true; }
+
+        return false;
+    }
+
+    public void show() {
+
+        //show the move in a friendly way
+        //index cords need to be converted to chess notation
+
+        return;
+    }
     
 }

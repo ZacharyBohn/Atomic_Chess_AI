@@ -1,12 +1,18 @@
 import java.util.ArrayList;
+import java.io.Serializable;
 
-public class BoardState {
+public class BoardState  implements java.io.Serializable {
+    //must be defined to implement serializable
+    private static final long serialVersionUID = 44005L;
     public Move initiatingMove;
     public BoardState parent;
     public int[][] positions;
     public ArrayList<Move> validMoves;
+    //this is the map that stores what moves turn into what
+    //board states
+    public ArrayList<BoardState> knownMoves;
     public boolean whitesTurn;
-    //used to determine if a player can castle
+    //these are used to determine if a player can castle
     public boolean whiteKingMoved;
     public boolean blackKingMoved;
     public boolean whiteRook0Moved;
@@ -17,6 +23,7 @@ public class BoardState {
     public BoardState() {
         //initialize variables in default states
         positions = new int[8][8];
+        knownMoves = new ArrayList<BoardState>();
         validMoves = new ArrayList<Move>();
         whitesTurn = true;
         whiteKingMoved = false;
