@@ -1,10 +1,11 @@
 import java.util.ArrayList;
 import java.io.Serializable;
 
-public class BoardState  implements java.io.Serializable {
+public class BoardState  implements Serializable {
     //must be defined to implement serializable
     private static final long serialVersionUID = 44005L;
     public Move initiatingMove;
+    public int desirability;
     public BoardState parent;
     public int[][] positions;
     public ArrayList<Move> validMoves;
@@ -22,6 +23,7 @@ public class BoardState  implements java.io.Serializable {
 
     public BoardState() {
         //initialize variables in default states
+        desirability = 
         positions = new int[8][8];
         knownMoves = new ArrayList<BoardState>();
         validMoves = new ArrayList<Move>();
@@ -107,5 +109,11 @@ public class BoardState  implements java.io.Serializable {
         return true;
     }
 
+    public void serialize() {
+        return;
+    }
 
+    public void deserialize() {
+        return;
+    }
 }
