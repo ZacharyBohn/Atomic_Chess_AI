@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.io.Serializable;
 
-public class BoardState  implements java.io.Serializable {
+public class BoardState  implements Serializable {
     //must be defined to implement serializable
     private static final long serialVersionUID = 44005L;
     public Move initiatingMove;
@@ -147,5 +147,4 @@ public class BoardState  implements java.io.Serializable {
         //and placed in memory, it re-creates the structure of the board state map
         return;
     }
-
 }
