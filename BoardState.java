@@ -39,6 +39,37 @@ public class BoardState  implements Serializable {
 
     public void setupInitialBoard() {
         //set starting positions for the chess game
+
+        //black back rank
+        positions[0][0] = 1;
+        positions[1][0] = 2;
+        positions[2][0] = 3;
+        positions[3][0] = 4;
+        positions[4][0] = 5;
+        positions[5][0] = 3;
+        positions[6][0] = 2;
+        positions[7][0] = 1;
+
+        //black pawns
+        for (int x=0; x<8; x++) {
+            positions[x][1] = 6; 
+        }
+
+        //white back rank
+        positions[0][7] = 8;
+        positions[1][7] = 9;
+        positions[2][7] = 10;
+        positions[3][7] = 11;
+        positions[4][7] = 12;
+        positions[5][7] = 10;
+        positions[6][7] = 9;
+        positions[7][7] = 8;
+
+        //white pawns
+        for (int x=0; x<8; x++) {
+            positions[x][6] = 7; 
+        }
+
         return;
     }
 
