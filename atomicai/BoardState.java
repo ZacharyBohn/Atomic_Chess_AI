@@ -142,6 +142,43 @@ public class BoardState  implements Serializable {
         //remove the piece from x, y and
         //explode all pieces within 1 space of x, y
         //except pawns
+        positions[x][y] = 0;
+        //need to create a sequence of numbers to loop through in order
+        //to check the spaces around the given x,y
+        //
+        //however, checking spaces that dont exist (ie -1) needs to be
+        //avoided.  The xList and yList below represent which spaces
+        //to check relative to the given x,y.  These lists will not
+        //go outside the board
+        ArrayList<Integer> xList = new ArrayList<Integer>();
+        ArrayList<Integer> yList = new ArrayList<Integer>();
+        xList.add(0);
+        yList.add(0);
+        //0 is the left most space of the board
+        if (x == 0) { xList.add(1); }
+        //7 is the right most space of the board
+        else if (x == 7) { xList.add(-1); }
+        else {
+            xList.add(-1);
+            xList.add(1);
+        }
+        if (y == 0) { yList.add(1); }
+        else if (y == 7) { yList.add(-1); }
+        else {
+            yList.add(-1);
+            yList.add(1);
+        }
+
+        for (int spaceX : xList) {
+            for (int spaceY : yList) {
+                //6 and 7 are pawns id's
+                if (positions[x + spaceX][y + spaceY] != 6 &&
+                positions[x + spaceX][y + spaceY] != 7) {
+                    positions[x + spaceX][y + spaceY] = 0;
+                }
+            }
+        }
+
         return;
     }
 

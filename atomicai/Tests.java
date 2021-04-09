@@ -31,6 +31,11 @@ public class Tests {
         else { System.out.println("test failed"); }
         System.out.println();
 
+        System.out.println("Testing branch()");
+        if (testBranch()) { System.out.println("ok"); }
+        else { System.out.println("test failed"); }
+        System.out.println();
+
         System.out.println("Testing checkVictory()");
         if (testCheckVictory()) { System.out.println("ok"); }
         else { System.out.println("test failed"); }
@@ -96,11 +101,6 @@ public class Tests {
         else { System.out.println("test failed"); }
         System.out.println();
 
-        System.out.println("Testing branch()");
-        if (testBranch()) { System.out.println("ok"); }
-        else { System.out.println("test failed"); }
-        System.out.println();
-
         return;
     }
 
@@ -160,7 +160,6 @@ public class Tests {
     public static boolean testMove() {
 
         BoardState boardState = new BoardState();
-        boardState.setupInitialBoard();
         if (boardState.positions == null) { return false; }
         //place a piece, them move the piece
         boardState.positions[0][0] = 1;
