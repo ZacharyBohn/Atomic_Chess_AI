@@ -185,6 +185,26 @@ public class BoardState  implements Serializable {
     public boolean checkVictory() {
         //check to see if the board is currently within a victory state
         //either because a king is dead, or a king is in checkmate
+
+        //check to see if both kings are on the board
+        boolean whiteKingPresent = false;
+        boolean blackKingPresent = false;
+
+        for (int x=0; x<8; x++) {
+            for (int y=0; y<8; y++) {
+                //11 is the white king
+                //4 is the black king
+                if (positions[x][y] == 11) { whiteKingPresent = true; }
+                if (positions[x][y] == 4) { blackKingPresent = true; }
+            }
+        }
+
+        if (!whiteKingPresent || !blackKingPresent) { return true; }
+
+        //if the turn player has no valid moves, then they are in checkmate
+        generateValidMoves();
+        if (validMoves.size() == 0) { return true; }
+
         return false;
     }
 
