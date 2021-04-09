@@ -216,7 +216,9 @@ public class BoardState  implements Serializable {
 
     public boolean isValid(Move move) {
         //check if a move is within the valid moves list
-        return true;
+        generateValidMoves();
+        if (containsMove(validMoves, move)) { return true; }
+        return false;
     }
 
     public boolean opponentMoveTo(int x, int y) {
@@ -227,6 +229,23 @@ public class BoardState  implements Serializable {
 
     public void generateValidMoves() {
         //generate all valid moves for the turn player
+        validMoves = new ArrayList<Move>();
+
+        int[] turnPlayerPieces = new int[6];
+
+        if (whitesTurn) { turnPlayerPieces = whitePieces; }
+        if (!whitesTurn) { turnPlayerPieces = blackPieces; }
+
+        for (int x=0; x<8; x++) {
+            for (int y=0; y<8; y++) {
+                if (containsPiece(turnPlayerPieces, positions[x][y])) {
+                    for (Move m : createMoves(x, y)) { validMoves.add(m); }
+                }
+            }
+        }
+
+        removeSuicideMoves(validMoves);
+
         return;
     }
 
@@ -234,6 +253,11 @@ public class BoardState  implements Serializable {
         //the moves given will be semi-valid, some of them may include
         //moves that kill one's own king or place one's own king in check
         //remove these
+        return new ArrayList<Move>();
+    }
+
+    public ArrayList<Move> createMoves(int x, int y) {
+        //generate the moves for the piece at location x,y
         return new ArrayList<Move>();
     }
 
@@ -276,6 +300,14 @@ public class BoardState  implements Serializable {
     public boolean containsMove(ArrayList<Move> arrayList, Move move) {
         //return whether or not the given move is in the given list
         return true;
+    }
+
+    public boolean containsPiece(int[] pieceArray, int piece) {
+        //returns whether the given piece is in the given array
+        for (int x : pieceArray) {
+            if (x == piece) { return true; }
+        }
+        return false;
     }
 
     public void copyTo(BoardState otherState) {
