@@ -1,3 +1,5 @@
+package atomicai;
+
 public class Move {
 
     public int fromX;

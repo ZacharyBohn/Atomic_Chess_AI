@@ -1,3 +1,5 @@
+package atomicai;
+
 public class Ai {
     
     public int experimentalness;

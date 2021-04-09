@@ -1,9 +1,7 @@
+package atomicai;
+
 import java.util.ArrayList;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-import java.io.IOException;
+
 
 public class Tests {
 
@@ -117,16 +115,22 @@ public class Tests {
         if (boardState.positions == null) { return false; }
         //if any of these are false, then the test fails
         if (
-            boardState.positions[0][0] != 1 ||
-            boardState.positions[0][1] != 2 ||
-            boardState.positions[0][2] != 3 ||
-            boardState.positions[0][3] != 4 ||
-            boardState.positions[0][4] != 5 ||
-            boardState.positions[7][0] != 8 ||
-            boardState.positions[7][1] != 9 ||
-            boardState.positions[7][2] != 10 ||
-            boardState.positions[7][3] != 11 ||
-            boardState.positions[7][4] != 12
+            boardState.positions[0][0] != 1  ||
+            boardState.positions[1][0] != 2  ||
+            boardState.positions[2][0] != 3  ||
+            boardState.positions[3][0] != 4  ||
+            boardState.positions[4][0] != 5  ||
+            boardState.positions[5][0] != 3  ||
+            boardState.positions[6][0] != 2  ||
+            boardState.positions[7][0] != 1  ||
+            boardState.positions[0][7] != 8  ||
+            boardState.positions[1][7] != 9  ||
+            boardState.positions[2][7] != 10 ||
+            boardState.positions[3][7] != 11 ||
+            boardState.positions[4][7] != 12 ||
+            boardState.positions[5][7] != 10 ||
+            boardState.positions[6][7] != 9  ||
+            boardState.positions[7][7] != 8
             ) {
                 return false;
             }

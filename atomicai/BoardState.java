@@ -1,5 +1,15 @@
+package atomicai;
+
 import java.util.ArrayList;
 import java.io.Serializable;
+import java.util.stream.IntStream;
+
+//used for reading/writing to/from disk
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
+import java.io.IOException;
 
 public class BoardState  implements Serializable {
     //must be defined to implement serializable
@@ -20,6 +30,25 @@ public class BoardState  implements Serializable {
     public boolean blackRook0Moved;
     public boolean whiteRook7Moved;
     public boolean blackRook7Moved;
+    //only used to determine if a piece is black or white
+    public static int[] whitePieces;
+    public static int[] blackPieces;
+    static {
+        blackPieces = new int[6];
+        whitePieces = new int[6];
+        blackPieces[0] = 1; //rook
+        blackPieces[1] = 2; //knight
+        blackPieces[2] = 3; //bishop
+        blackPieces[3] = 4; //king
+        blackPieces[4] = 5; //queen
+        blackPieces[5] = 6; //pawn
+        whitePieces[0] = 7; //pawn
+        whitePieces[1] = 8; //rook
+        whitePieces[2] = 9; //knight
+        whitePieces[3] = 10; //bishop
+        whitePieces[4] = 11; //king
+        whitePieces[5] = 12; //queen
+    }
 
     public BoardState() {
         //initialize variables in default states
@@ -73,15 +102,40 @@ public class BoardState  implements Serializable {
         return;
     }
 
-    public void move(int oldX, int oldY, int newX, int newY) {
-        //move piece from oldX, oldY to newX, newY
-        //this does not take into account legality
+    public void move(Move move) {
+        move(move.fromX, move.fromY, move.toX, move.toY);
         return;
     }
 
-    public void branch(Move branchingMove) {
-        //branch the map for the given move
+    public void move(int oldX, int oldY, int newX, int newY) {
+        //move piece from oldX, oldY to newX, newY
+        //this does not take into account legality
+
+        boolean opposingPieces = !(IntStream.of(whitePieces).anyMatch(
+                x -> x == positions[oldX][oldY]) == 
+            IntStream.of(whitePieces).anyMatch(
+                x -> x == positions[newX][newY]
+            ));
+
+        if (opposingPieces) { explode(newX, newY); }
+        else{
+            positions[newX][newY] = positions[oldX][oldY];
+        }
+
+        positions[oldX][oldY] = 0;
+
         return;
+    }
+
+    public BoardState branch(Move branchingMove) {
+        //branch the map for the given move
+        BoardState subState = new BoardState();
+        copyTo(subState);
+        subState.initiatingMove = branchingMove;
+        subState.move(branchingMove);
+        subState.whitesTurn = !whitesTurn;
+        knownMoves.add(subState);
+        return subState;
     }
 
     public void explode(int x, int y) {
@@ -165,6 +219,28 @@ public class BoardState  implements Serializable {
     public boolean containsMove(ArrayList<Move> arrayList, Move move) {
         //return whether or not the given move is in the given list
         return true;
+    }
+
+    public void copyTo(BoardState otherState) {
+        //copy all relevent values from self to the given board state
+        //this will NOT copy known moves list or the valid moves list
+
+        //copy each position indivitually
+        for (int x=0; x<8; x++) {
+            for (int y=0; y<8; y++) {
+                otherState.positions[x][y] = positions[x][y];
+            }
+        }
+
+        otherState.whitesTurn = whitesTurn;
+        otherState.whiteKingMoved = whiteKingMoved;
+        otherState.blackKingMoved = blackKingMoved;
+        otherState.whiteRook0Moved = whiteRook0Moved;
+        otherState.blackRook0Moved = blackRook0Moved;
+        otherState.whiteRook7Moved = whiteRook7Moved;
+        otherState.blackRook7Moved = blackRook7Moved;
+
+        return;
     }
 
     public void serialize() {
