@@ -30,6 +30,7 @@ public class BoardState  implements Serializable {
     public boolean blackRook0Moved;
     public boolean whiteRook7Moved;
     public boolean blackRook7Moved;
+    public boolean validMovesGenerated;
     //only used to determine if a piece is black or white
     public static int[] whitePieces;
     public static int[] blackPieces;
@@ -63,6 +64,7 @@ public class BoardState  implements Serializable {
         whiteRook7Moved = false;
         blackRook0Moved = false;
         blackRook7Moved = false;
+        validMovesGenerated = false;
         return;
     }
 
@@ -211,12 +213,39 @@ public class BoardState  implements Serializable {
     public boolean lookAhead(int turns) {
         //see if victory is possible with X turns ahead
         //this does NOT mean forced checkmate, just possible checkmate
+        //
+        //warning!  recursion ahead! =0
+
+        //base case
+        if (turns == 1) {
+            BoardState nextMove;
+            for (Move m : validMoves) {
+                nextMove = new BoardState();
+                copyTo(nextMove);
+                nextMove.move(m);
+                if (nextMove.checkVictory()) { return true; }
+            }
+            return false;
+        }
+
+        //recursive part
+        BoardState nextMove;
+        for (Move m : validMoves) {
+            nextMove = new BoardState();
+            copyTo(nextMove);
+            nextMove.generateValidMoves();
+            nextMove.move(m);
+            if (nextMove.lookAhead(turns - 1)) {
+                return true;
+            }
+        }
+
         return false;
     }
 
     public boolean isValid(Move move) {
         //check if a move is within the valid moves list
-        generateValidMoves();
+        if (!validMovesGenerated) { generateValidMoves(); }
         if (containsMove(validMoves, move)) { return true; }
         return false;
     }
@@ -224,7 +253,16 @@ public class BoardState  implements Serializable {
     public boolean opponentMoveTo(int x, int y) {
         //check if the non-turn player can move any piece to
         //x, y
-        return true;
+
+        BoardState b = new BoardState();
+        copyTo(b);
+        b.whitesTurn = !whitesTurn;
+        b.generateValidMoves();
+        for (Move m : b.validMoves) {
+            if (m.toX == x && m.toY == y) { return true; }
+        }
+
+        return false;
     }
 
     public void generateValidMoves() {
@@ -245,6 +283,7 @@ public class BoardState  implements Serializable {
         }
 
         removeSuicideMoves(validMoves);
+        validMovesGenerated = true;
 
         return;
     }
