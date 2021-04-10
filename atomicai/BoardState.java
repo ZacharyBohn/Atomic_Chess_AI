@@ -265,6 +265,19 @@ public class BoardState  implements Serializable {
         return false;
     }
 
+    public boolean inCheck() {
+        //checks if the turn player is in check
+
+        
+
+        return true;
+    }
+
+    public boolean kingAlive(boolean whitesKing) {
+        //checks if a specific king is still on the board
+        return true;
+    }
+
     public void generateValidMoves() {
         //generate all valid moves for the turn player
         validMoves = new ArrayList<Move>();
@@ -292,7 +305,18 @@ public class BoardState  implements Serializable {
         //the moves given will be semi-valid, some of them may include
         //moves that kill one's own king or place one's own king in check
         //remove these
-        return new ArrayList<Move>();
+
+        ArrayList<Move> trueValidMoves = new ArrayList<Move>();
+        BoardState nextMove = new BoardState();
+        for (Move m : moves) {
+            copyTo(nextMove);
+            nextMove.move(m);
+            if (nextMove.kingAlive(nextMove.whitesTurn) && !nextMove.inCheck()) {
+                trueValidMoves.add(m);
+            }
+        }
+
+        return trueValidMoves;
     }
 
     public ArrayList<Move> createMoves(int x, int y) {
