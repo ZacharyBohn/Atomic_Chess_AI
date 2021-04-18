@@ -299,7 +299,7 @@ public class BoardState  implements Serializable {
             }
         }
 
-        return false;
+        return true;
     }
 
     public void generateValidMoves() {
@@ -346,34 +346,54 @@ public class BoardState  implements Serializable {
 
     public ArrayList<Move> createMoves(int x, int y) {
         //generate the moves for the piece at location x,y
-        return new ArrayList<Move>();
+        int pieceId = positions[x][y];
+        //pawns 6, 7
+        if (pieceId == 6 || pieceId == 7) { return pawnMoves(x, y); }
+        //rooks 1, 8
+        if (pieceId == 1 || pieceId == 8) { return rookMoves(x, y); }
+        //knights 2, 9
+        if (pieceId == 2 || pieceId == 9) { return knightMoves(x, y); }
+        //bishops 3, 10
+        if (pieceId == 3 || pieceId == 10) { return bishopMoves(x, y); }
+        //kings 4, 11
+        if (pieceId == 1 || pieceId == 11) { return kingMoves(x, y); }
+        //queens 5, 12
+        if (pieceId == 5 || pieceId == 12) { return queenMoves(x, y); }
+        //default return value
+        return new ListArray<Move>();
     }
 
+    //NOT YET IMPLEMENTED
     private ArrayList<Move> pawnMoves (int x, int y) {
         //generate all valid moves for a pawn at x,y
         return new ArrayList<Move>();
     }
 
+    //NOT YET IMPLEMENTED
     private ArrayList<Move> rookMoves (int x, int y) {
         //generate all valid moves for a rook at x,y
         return new ArrayList<Move>();
     }
 
+    //NOT YET IMPLEMENTED
     private ArrayList<Move> knightMoves (int x, int y) {
         //generate all valid moves for a knight at x,y
         return new ArrayList<Move>();
     }
 
+    //NOT YET IMPLEMENTED
     private ArrayList<Move> bishopMoves (int x, int y) {
         //generate all valid moves for a bishop at x,y
         return new ArrayList<Move>();
     }
 
+    //NOT YET IMPLEMENTED
     private ArrayList<Move> queenMoves (int x, int y) {
         //generate all valid moves for a queen at x,y
         return new ArrayList<Move>();
     }
 
+    //NOT YET IMPLEMENTED
     private ArrayList<Move> kingMoves (int x, int y) {
         //generate all valid moves for a king at x,y
         return new ArrayList<Move>();
@@ -382,12 +402,40 @@ public class BoardState  implements Serializable {
     private ArrayList<Move> directionalMoves (int x, int y, int dirX, int dirY) {
         //generate all valid moves for a piece at x,y moving along
         //the given direction
-        return new ArrayList<Move>();
+
+        ArrayList<Move> moves = new ArrayList<Move>();
+        int[] turnPlayerPieces;
+        if (whitesTurn) { turnPlayerPieces = whitePieces; }
+        if (!whitesTurn) { turnPlayerPieces = blackPieces; }
+        int pieceId = positions[x][y];
+        int cursorX = x + dirX;
+        int cursorY = y + dirY;
+        while (true) {
+            if (cursorX < 0 || cursorX > 7) { break; }
+            if (cursorY < 0 || cursorY > 7) { break; }
+            if (containsPiece(turnPlayerPieces, pieceId)) { break; }
+            Move move = new Move(x, y, cursorX, cursorY);
+            moves.add(move);
+            //can't skip over opponent's piece
+            if (positions[x][y] != 0) { break; }
+        }
+
+        return moves;
     }
 
     public boolean containsMove(ArrayList<Move> arrayList, Move move) {
         //return whether or not the given move is in the given list
-        return true;
+
+        for (Move m : arrayList) {
+            if (move.fromX == m.fromX &&
+                move.fromY == m.fromY &&
+                move.toX == m.toX &&
+                move.toY == m.toY) {
+                    return true;
+                }
+        }
+
+        return false;
     }
 
     public boolean containsPiece(int[] pieceArray, int piece) {
@@ -420,12 +468,14 @@ public class BoardState  implements Serializable {
         return;
     }
 
+    //NOT YET IMPLEMENTED
     public void serialize() {
         //this will prepare the board state (and all children)
         //to be written to the disk
         return;
     }
 
+    //NOT YET IMPLEMENTED
     public void deserialize() {
         //this is called after the baordstate has been read from the disk
         //and placed in memory, it re-creates the structure of the board state map
