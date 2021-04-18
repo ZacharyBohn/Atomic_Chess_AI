@@ -3,7 +3,6 @@ package atomicai;
 import java.util.ArrayList;
 import java.io.Serializable;
 import java.util.stream.IntStream;
-
 //used for reading/writing to/from disk
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
