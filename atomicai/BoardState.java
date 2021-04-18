@@ -267,15 +267,39 @@ public class BoardState  implements Serializable {
 
     public boolean inCheck() {
         //checks if the turn player is in check
+        //if the king is not on the board, this will return false
 
-        
+        int turnPlayerKingId;
+        if (whitesTurn) { turnPlayerKingId = 11; }
+        if (!whitesTurn) { turnPlayerKingId = 4; }
+        for (int x=0; x<8; x++) {
+            for (int y=0; y<8; y++) {
+                if (positions[x][y] == turnPlayerKingId) {
+                    if (opponentMoveTo(x, y)) {
+                        return true;
+                    }
+                }
+            }
+        }
 
-        return true;
+        return false;
     }
 
     public boolean kingAlive(boolean whitesKing) {
         //checks if a specific king is still on the board
-        return true;
+
+        int turnPlayerKingId;
+        if (whitesTurn) { turnPlayerKingId = 11; }
+        if (!whitesTurn) { turnPlayerKingId = 4; }
+        for (int x=0; x<8; x++) {
+            for (int y=0; y<8; y++) {
+                if (positions[x][y] == turnPlayerKingId) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public void generateValidMoves() {
@@ -303,12 +327,13 @@ public class BoardState  implements Serializable {
 
     private ArrayList<Move> removeSuicideMoves(ArrayList<Move> moves) {
         //the moves given will be semi-valid, some of them may include
-        //moves that kill one's own king or place one's own king in check
+        //moves that kill one's own king or place one's own king in check.
         //remove these
 
         ArrayList<Move> trueValidMoves = new ArrayList<Move>();
-        BoardState nextMove = new BoardState();
+        BoardState nextMove;
         for (Move m : moves) {
+            nextMove = new BoardState();
             copyTo(nextMove);
             nextMove.move(m);
             if (nextMove.kingAlive(nextMove.whitesTurn) && !nextMove.inCheck()) {
