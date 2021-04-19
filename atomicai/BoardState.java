@@ -1,6 +1,7 @@
 package atomicai;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.io.Serializable;
 import java.util.stream.IntStream;
 //used for reading/writing to/from disk
@@ -50,6 +51,23 @@ public class BoardState  implements Serializable {
         whitePieces[4] = 11; //king
         whitePieces[5] = 12; //queen
     }
+    public static HashMap<Integer, String> friendlyIds;
+    static {
+        friendlyIds = new HashMap<Integer, String>();
+        friendlyIds.put(0, "- ");
+        friendlyIds.put(1, "r.");
+        friendlyIds.put(2, "n.");
+        friendlyIds.put(3, "b.");
+        friendlyIds.put(4, "k.");
+        friendlyIds.put(5, "q.");
+        friendlyIds.put(6, "p.");
+        friendlyIds.put(7, "p ");
+        friendlyIds.put(8, "r ");
+        friendlyIds.put(9, "n ");
+        friendlyIds.put(10, "b ");
+        friendlyIds.put(11, "k ");
+        friendlyIds.put(12, "q ");
+    }
 
     public BoardState() {
         //initialize variables in default states
@@ -75,8 +93,8 @@ public class BoardState  implements Serializable {
         positions[0][0] = 1;
         positions[1][0] = 2;
         positions[2][0] = 3;
-        positions[3][0] = 4;
-        positions[4][0] = 5;
+        positions[3][0] = 5;
+        positions[4][0] = 4;
         positions[5][0] = 3;
         positions[6][0] = 2;
         positions[7][0] = 1;
@@ -90,8 +108,8 @@ public class BoardState  implements Serializable {
         positions[0][7] = 8;
         positions[1][7] = 9;
         positions[2][7] = 10;
-        positions[3][7] = 11;
-        positions[4][7] = 12;
+        positions[3][7] = 12;
+        positions[4][7] = 11;
         positions[5][7] = 10;
         positions[6][7] = 9;
         positions[7][7] = 8;
@@ -99,6 +117,21 @@ public class BoardState  implements Serializable {
         //white pawns
         for (int x=0; x<8; x++) {
             positions[x][6] = 7; 
+        }
+
+        return;
+    }
+
+    public void printBoard() {
+
+        System.out.println("    A  B  C  D  E  F  G  H");
+        System.out.println("    ----------------------");
+        for (int y=0; y<8; y++) {
+            System.out.print((8-y) + " | ");
+            for (int x=0; x<8; x++) {
+                System.out.print(friendlyIds.get(positions[x][y]) + " ");
+            }
+            System.out.print("\n");
         }
 
         return;
@@ -337,8 +370,10 @@ public class BoardState  implements Serializable {
             nextMove = new BoardState();
             copyTo(nextMove);
             nextMove.move(m);
-            if (nextMove.kingAlive(nextMove.whitesTurn) && !nextMove.inCheck()) {
-                trueValidMoves.add(m);
+            if (nextMove.kingAlive(nextMove.whitesTurn)) {
+                if (!nextMove.inCheck() || nextMove.kingAlive(!nextMove.whitesTurn)) {
+                    trueValidMoves.add(m);
+                }
             }
         }
 
@@ -441,10 +476,34 @@ public class BoardState  implements Serializable {
         return moves;
     }
 
-    //NOT YET IMPLEMENTED
     private ArrayList<Move> knightMoves(int x, int y) {
         //generate all valid moves for a knight at x,y
-        return new ArrayList<Move>();
+
+        ArrayList<Move> moves = new ArrayList<Move>();
+        int[] turnPlayerPieces;
+        if (whitesTurn) { turnPlayerPieces = whitePieces; }
+        else { turnPlayerPieces = blackPieces; }
+        ArrayList<Integer> seqX = new ArrayList<Integer>();
+        ArrayList<Integer> seqY = new ArrayList<Integer>();
+
+        if (x >= 2) { seqX.add(-2); }
+        if (x >= 1) { seqX.add(-1); }
+        if (x <= 6) { seqX.add(1); }
+        if (x <= 5) { seqX.add(2); }
+        if (y >= 2) { seqY.add(-2); }
+        if (y >= 1) { seqY.add(-1); }
+        if (y <= 5) { seqY.add(1); }
+        if (y <= 6) { seqY.add(2); }
+
+        for (int moveX : seqX) {
+            for (int moveY : seqY) {
+                if (!containsPiece(turnPlayerPieces, positions[moveX][moveY])) {
+                    moves.add(new Move(x, y, moveX, moveY));
+                }
+            }
+        }
+
+        return moves;
     }
 
     //NOT YET IMPLEMENTED

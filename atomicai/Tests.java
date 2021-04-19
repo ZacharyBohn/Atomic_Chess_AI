@@ -2,11 +2,18 @@ package atomicai;
 
 import java.util.ArrayList;
 
-
 public class Tests {
 
     public static void main(String[] args) {
-        runAllTests();
+        testBoard();
+        //runAllTests();
+    }
+
+    public static void testBoard() {
+        BoardState b = new BoardState();
+        b.setupInitialBoard();
+        b.printBoard();
+        return;
     }
 
     public static void runAllTests() {
