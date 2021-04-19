@@ -137,6 +137,11 @@ public class BoardState  implements Serializable {
         return;
     }
 
+    //NOT YET IMPLEMENTED
+    public boolean moveAndPassturn(int oldX, int oldY, int newX, int newY) {
+        return true;
+    }
+
     public void move(Move move) {
         move(move.fromX, move.fromY, move.toX, move.toY);
         return;
@@ -146,19 +151,52 @@ public class BoardState  implements Serializable {
         //move piece from oldX, oldY to newX, newY
         //this does not take into account legality
 
-        boolean opposingPieces = !(IntStream.of(whitePieces).anyMatch(
-                x -> x == positions[oldX][oldY]) == 
-            IntStream.of(whitePieces).anyMatch(
-                x -> x == positions[newX][newY]
-            ));
+        boolean opposingPieces = (
+            containsPiece(whitePieces, positions[oldX][oldY]) ==
+            containsPiece(blackPieces, positions[newX][newY]));
 
         if (opposingPieces) { explode(newX, newY); }
-        else{
+        else {
             positions[newX][newY] = positions[oldX][oldY];
+            //apply castling if applicable
+            //white queen side castle: 4,7 - 2,7
+            if (oldX == 4 && oldY == 7 && newX == 2 && newY == 7) {
+                //move the white rook
+                positions[0][7] = 0;
+                positions[3][7] = 8;
+            }
+            //white king side castle: 4,7 - 6,7
+            if (oldX == 4 && oldY == 7 && newX == 6 && newY == 7) {
+                //move the white rook
+                positions[7][7] = 0;
+                positions[5][7] = 8;
+            }
+            //black queen side castle: 4,0 - 2,0
+            if (oldX == 4 && oldY == 0 && newX == 2 && newY == 0) {
+                //move the black rook
+                positions[0][0] = 0;
+                positions[3][0] = 1;
+            }
+            //black king side castle: 4,0 - 6,0
+            if (oldX == 4 && oldY == 0 && newX == 6 && newY == 0) {
+                //move the black rook
+                positions[7][0] = 0;
+                positions[5][0] = 1;
+            }
+
         }
 
         positions[oldX][oldY] = 0;
         lastMove = new Move(oldX, oldY, newX, newY);
+
+        //keep track of which pieces moved, so that castling
+        //can be calculated
+        if (oldX == 4 && oldY == 7) { whiteKingMoved = true; }
+        if (oldX == 0 && oldY == 7) { whiteRook0Moved = true; }
+        if (oldX == 7 && oldY == 7) { whiteRook7Moved = true; }
+        if (oldX == 4 && oldY == 0) { blackKingMoved = true; }
+        if (oldX == 0 && oldY == 0) { blackRook0Moved = true; }
+        if (oldX == 7 && oldY == 0) { blackRook7Moved = true; }
 
         return;
     }
@@ -506,22 +544,119 @@ public class BoardState  implements Serializable {
         return moves;
     }
 
-    //NOT YET IMPLEMENTED
     private ArrayList<Move> bishopMoves(int x, int y) {
         //generate all valid moves for a bishop at x,y
-        return new ArrayList<Move>();
+
+        ArrayList<Move> moves = new ArrayList<Move>();
+        //left forward
+        for (Move m : directionalMoves(x, y, -1, -1)) { moves.add(m); }
+        //left backwards
+        for (Move m : directionalMoves(x, y, -1, 1)) { moves.add(m); }
+        //right forward
+        for (Move m : directionalMoves(x, y, 1, -1)) { moves.add(m); }
+        //right backwards
+        for (Move m : directionalMoves(x, y, 1, 1)) { moves.add(m); }
+
+        return moves;
     }
 
-    //NOT YET IMPLEMENTED
     private ArrayList<Move> queenMoves(int x, int y) {
         //generate all valid moves for a queen at x,y
-        return new ArrayList<Move>();
+
+        ArrayList<Move> moves = new ArrayList<Move>();
+        //left forward
+        for (Move m : directionalMoves(x, y, -1, -1)) { moves.add(m); }
+        //forward
+        for (Move m : directionalMoves(x, y, 0, -1)) { moves.add(m); }
+        //right forward
+        for (Move m : directionalMoves(x, y, 1, -1)) { moves.add(m); }
+        //right
+        for (Move m : directionalMoves(x, y, 1, 0)) { moves.add(m); }
+        //right backward
+        for (Move m : directionalMoves(x, y, 1, 1)) { moves.add(m); }
+        //backward
+        for (Move m : directionalMoves(x, y, 0, 1)) { moves.add(m); }
+        //left backward
+        for (Move m : directionalMoves(x, y, -1, 1)) { moves.add(m); }
+        //left
+        for (Move m : directionalMoves(x, y, -1, 0)) { moves.add(m); }
+
+        return moves;
     }
 
-    //NOT YET IMPLEMENTED
     private ArrayList<Move> kingMoves(int x, int y) {
         //generate all valid moves for a king at x,y
-        return new ArrayList<Move>();
+
+        ArrayList<Move> moves = new ArrayList<Move>();
+        ArrayList<Integer> seqX = new ArrayList<Integer>();
+        ArrayList<Integer> seqY = new ArrayList<Integer>();
+        //this avoids out of index error for positions if the
+        //king is on the side of the board
+        if (x != 0) { seqX.add(-1); }
+        if (x != 7) { seqX.add(1); }
+        if (y != 0) { seqY.add(-1); }
+        if (y != 7) { seqY.add(1); }
+
+        //normal moves
+        for (int moveX : seqX) {
+            for (int moveY : seqY) {
+                if (positions[moveX][moveY] == 0) {
+                    moves.add(new Move(x, y, moveX, moveY));
+                }
+            }
+        }
+
+        //white castling
+        if (whitesTurn &&
+            !whiteKingMoved) {
+                //queens side
+                if (positions[0][7] == 8 &&
+                    !whiteRook0Moved &&
+                    !opponentMoveTo(1, 7) &&
+                    !opponentMoveTo(2, 7) &&
+                    !opponentMoveTo(3, 7) &&
+                    positions[1][7] == 0 &&
+                    positions[2][7] == 0 &&
+                    positions[3][7] == 0) {
+                        moves.add(new Move(x, y, 2 ,7));
+                    }
+                //kings side
+                if (positions[7][7] == 8 &&
+                    !whiteRook7Moved &&
+                    !opponentMoveTo(5, 7) &&
+                    !opponentMoveTo(6, 7) &&
+                    positions[5][7] == 0 &&
+                    positions[6][7] == 0) {
+                        moves.add(new Move(x, y, 6, 7));
+                    }
+
+            }
+        //black castling
+        if (!whitesTurn &&
+            !blackKingMoved) {
+                //queens side
+                if (positions[0][0] == 1 &&
+                    !blackRook0Moved &&
+                    !opponentMoveTo(1, 0) &&
+                    !opponentMoveTo(2, 0) &&
+                    !opponentMoveTo(3, 0) &&
+                    positions[1][0] == 0 &&
+                    positions[2][0] == 0 &&
+                    positions[3][0] == 0) {
+                        moves.add(new Move(x, y, 2 ,0));
+                    }
+                //kings side
+                if (positions[7][0] == 1 &&
+                    !blackRook7Moved &&
+                    !opponentMoveTo(5, 0) &&
+                    opponentMoveTo(6, 0) &&
+                    positions[5][0] == 0 &&
+                    positions[6][0] == 0) {
+                        moves.add(new Move(x, y, 6, 0));
+                    }
+            }
+
+        return moves;
     }
 
     private ArrayList<Move> directionalMoves(int x, int y, int dirX, int dirY) {
