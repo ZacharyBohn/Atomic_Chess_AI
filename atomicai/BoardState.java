@@ -29,6 +29,7 @@ public class BoardState  implements Serializable {
     public boolean blackRook0Moved;
     public boolean whiteRook7Moved;
     public boolean blackRook7Moved;
+    public Move lastMove;
     public boolean validMovesGenerated;
     //only used to determine if a piece is black or white
     public static int[] whitePieces;
@@ -124,6 +125,7 @@ public class BoardState  implements Serializable {
         }
 
         positions[oldX][oldY] = 0;
+        lastMove = new Move(oldX, oldY, newX, newY);
 
         return;
     }
@@ -362,50 +364,115 @@ public class BoardState  implements Serializable {
         return new ListArray<Move>();
     }
 
-    //NOT YET IMPLEMENTED
-    private ArrayList<Move> pawnMoves (int x, int y) {
+    private ArrayList<Move> pawnMoves(int x, int y) {
         //generate all valid moves for a pawn at x,y
-        return new ArrayList<Move>();
+
+        //initial setup of variables
+        ArrayList<Move> moves = new ArrayList<Move>();
+        int[] opponentPieces;
+        int initialPositionY;
+        int direction;
+        int enPassantPositionY;
+        if (whitesTurn) {
+            opponentPieces = blackPieces;
+            initialPositionY = 6;
+            //the square that a pawn must be on to perform en passant
+            enPassantPositionY = 3;
+            //the direction the given pawn can move
+            direction = -1;
+        }
+        else {
+            opponentPieces = whitePieces;
+            initialPositionY = 1;
+            enPassantPositionY = 4;
+            direction = 1;
+        }
+
+        //moving forward 1 space
+        if (positions[x][y + direction] == 0) { moves.add(new Move(x, y, x, y + direction)); }
+        //moving forward 2 spaces
+        if (y == initialPositionY) {
+            //this if statement must be called AFTER the previous one to avoid
+            //a potential out of index access for positions
+            if (positions[x][y + direction] == 0 && positions[x][y + 2*direction] == 0) {
+                moves.add(new Move(x, y, x, y + 2*direction));
+            }
+        }
+        //attacking left
+        if (x != 0) {
+            if (containsPiece(opponentPieces, positions[x - 1][y + direction])) {
+                moves.add(new Move(x, y, x - 1, y + direction));
+            }
+        }
+        //attacking right
+        if (x != 7) {
+            if (containsPiece(opponentPieces, positions[x + 1][y + direction])) {
+                moves.add(new Move(x, y, x + 1, y + direction));
+            }
+        }
+        //en passant
+        //first, define what the last move must have been, for this pawn
+        //to be able to en passant, either to the left or right
+        Move leftPawnDoubleMove = new Move(x-1, y+(2*direction), x-1, y);
+        Move rightPawnDoubleMove = new Move(x+1, y+(2*direction), x+1, y);
+        if (y == enPassantPositionY && lastMove.equals(leftPawnDoubleMove)) {
+            moves.add(new Move(x, y, x-1, y+direction));
+        }
+        if (y == enPassantPositionY && lastMove.equals(rightPawnDoubleMove)) {
+            moves.add(new Move(x, y, x+1, y+direction));
+        }
+
+        return moves;
     }
 
-    //NOT YET IMPLEMENTED
-    private ArrayList<Move> rookMoves (int x, int y) {
+    private ArrayList<Move> rookMoves(int x, int y) {
         //generate all valid moves for a rook at x,y
-        return new ArrayList<Move>();
+
+        ArrayList<Move> moves = new ArrayList<Move>();
+        //left
+        for (Move m : directionalMoves(x, y, -1, 0)) { moves.add(m); }
+        //right
+        for (Move m : directionalMoves(x, y, 1, 0)) { moves.add(m); }
+        //forward
+        for (Move m : directionalMoves(x, y, 0, -1)) { moves.add(m); }
+        //backwards
+        for (Move m : directionalMoves(x, y, 0, 1)) { moves.add(m); }
+
+        return moves;
     }
 
     //NOT YET IMPLEMENTED
-    private ArrayList<Move> knightMoves (int x, int y) {
+    private ArrayList<Move> knightMoves(int x, int y) {
         //generate all valid moves for a knight at x,y
         return new ArrayList<Move>();
     }
 
     //NOT YET IMPLEMENTED
-    private ArrayList<Move> bishopMoves (int x, int y) {
+    private ArrayList<Move> bishopMoves(int x, int y) {
         //generate all valid moves for a bishop at x,y
         return new ArrayList<Move>();
     }
 
     //NOT YET IMPLEMENTED
-    private ArrayList<Move> queenMoves (int x, int y) {
+    private ArrayList<Move> queenMoves(int x, int y) {
         //generate all valid moves for a queen at x,y
         return new ArrayList<Move>();
     }
 
     //NOT YET IMPLEMENTED
-    private ArrayList<Move> kingMoves (int x, int y) {
+    private ArrayList<Move> kingMoves(int x, int y) {
         //generate all valid moves for a king at x,y
         return new ArrayList<Move>();
     }
 
-    private ArrayList<Move> directionalMoves (int x, int y, int dirX, int dirY) {
+    private ArrayList<Move> directionalMoves(int x, int y, int dirX, int dirY) {
         //generate all valid moves for a piece at x,y moving along
         //the given direction
 
         ArrayList<Move> moves = new ArrayList<Move>();
         int[] turnPlayerPieces;
         if (whitesTurn) { turnPlayerPieces = whitePieces; }
-        if (!whitesTurn) { turnPlayerPieces = blackPieces; }
+        else { turnPlayerPieces = blackPieces; }
         int pieceId = positions[x][y];
         int cursorX = x + dirX;
         int cursorY = y + dirY;

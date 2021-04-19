@@ -17,6 +17,8 @@ public class Move {
 
     public boolean equals(Move move) {
 
+        if (move == null) { return false; }
+
         if (fromX == move.fromX &&
             fromY == move.fromY &&
             toX == move.toX &&
