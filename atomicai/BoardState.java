@@ -3,7 +3,6 @@ package atomicai;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.Serializable;
-import java.util.stream.IntStream;
 //used for reading/writing to/from disk
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
@@ -137,9 +136,21 @@ public class BoardState  implements Serializable {
         return;
     }
 
-    //NOT YET IMPLEMENTED
-    public boolean moveAndPassturn(int oldX, int oldY, int newX, int newY) {
-        return true;
+    public boolean moveAndPassTurn(int oldX, int oldY, int newX, int newY) {
+        Move move = new Move(oldX, oldY, newX, newY);
+        return moveAndPassTurn(move.fromX, move.fromY, move.toX, move.toY);
+    }
+
+    public boolean moveAndPassTurn(Move move) {
+        //check if the move is valid
+        //if it is, then apply it, pass the turn and return true
+        //if not return false
+        if (containsMove(validMoves, move)) {
+            move(move);
+            whitesTurn = !whitesTurn;
+            return true;
+        }
+        return false;
     }
 
     public void move(Move move) {
@@ -276,7 +287,7 @@ public class BoardState  implements Serializable {
         if (!whiteKingPresent || !blackKingPresent) { return true; }
 
         //if the turn player has no valid moves, then they are in checkmate
-        generateValidMoves();
+        generateValidMoves(true);
         if (validMoves.size() == 0) { return true; }
 
         return false;
@@ -305,7 +316,7 @@ public class BoardState  implements Serializable {
         for (Move m : validMoves) {
             nextMove = new BoardState();
             copyTo(nextMove);
-            nextMove.generateValidMoves();
+            nextMove.generateValidMoves(true);
             nextMove.move(m);
             if (nextMove.lookAhead(turns - 1)) {
                 return true;
@@ -317,7 +328,7 @@ public class BoardState  implements Serializable {
 
     public boolean isValid(Move move) {
         //check if a move is within the valid moves list
-        if (!validMovesGenerated) { generateValidMoves(); }
+        if (!validMovesGenerated) { generateValidMoves(true); }
         if (containsMove(validMoves, move)) { return true; }
         return false;
     }
@@ -329,7 +340,7 @@ public class BoardState  implements Serializable {
         BoardState b = new BoardState();
         copyTo(b);
         b.whitesTurn = !whitesTurn;
-        b.generateValidMoves();
+        b.generateValidMoves(false);
         for (Move m : b.validMoves) {
             if (m.toX == x && m.toY == y) { return true; }
         }
@@ -343,7 +354,7 @@ public class BoardState  implements Serializable {
 
         int turnPlayerKingId;
         if (whitesTurn) { turnPlayerKingId = 11; }
-        if (!whitesTurn) { turnPlayerKingId = 4; }
+        else { turnPlayerKingId = 4; }
         for (int x=0; x<8; x++) {
             for (int y=0; y<8; y++) {
                 if (positions[x][y] == turnPlayerKingId) {
@@ -362,7 +373,7 @@ public class BoardState  implements Serializable {
 
         int turnPlayerKingId;
         if (whitesTurn) { turnPlayerKingId = 11; }
-        if (!whitesTurn) { turnPlayerKingId = 4; }
+        else { turnPlayerKingId = 4; }
         for (int x=0; x<8; x++) {
             for (int y=0; y<8; y++) {
                 if (positions[x][y] == turnPlayerKingId) {
@@ -374,7 +385,7 @@ public class BoardState  implements Serializable {
         return true;
     }
 
-    public void generateValidMoves() {
+    public void generateValidMoves(boolean removeSuicideMoves) {
         //generate all valid moves for the turn player
         validMoves = new ArrayList<Move>();
 
@@ -391,7 +402,7 @@ public class BoardState  implements Serializable {
             }
         }
 
-        removeSuicideMoves(validMoves);
+        if (removeSuicideMoves) { removeSuicideMoves(validMoves); }
         validMovesGenerated = true;
 
         return;
@@ -434,7 +445,7 @@ public class BoardState  implements Serializable {
         //queens 5, 12
         if (pieceId == 5 || pieceId == 12) { return queenMoves(x, y); }
         //default return value
-        return new ListArray<Move>();
+        return new ArrayList<Move>();
     }
 
     private ArrayList<Move> pawnMoves(int x, int y) {
@@ -521,23 +532,53 @@ public class BoardState  implements Serializable {
         int[] turnPlayerPieces;
         if (whitesTurn) { turnPlayerPieces = whitePieces; }
         else { turnPlayerPieces = blackPieces; }
-        ArrayList<Integer> seqX = new ArrayList<Integer>();
-        ArrayList<Integer> seqY = new ArrayList<Integer>();
-
-        if (x >= 2) { seqX.add(-2); }
-        if (x >= 1) { seqX.add(-1); }
-        if (x <= 6) { seqX.add(1); }
-        if (x <= 5) { seqX.add(2); }
-        if (y >= 2) { seqY.add(-2); }
-        if (y >= 1) { seqY.add(-1); }
-        if (y <= 5) { seqY.add(1); }
-        if (y <= 6) { seqY.add(2); }
-
-        for (int moveX : seqX) {
-            for (int moveY : seqY) {
-                if (!containsPiece(turnPlayerPieces, positions[moveX][moveY])) {
-                    moves.add(new Move(x, y, moveX, moveY));
-                }
+        
+        //move to -2, -1
+        if (x >= 2 && y >= 1) {
+            if (!containsPiece(turnPlayerPieces, positions[x-2][y-1])) {
+                moves.add(new Move(x, y, x-2, y-1));
+            }
+        }
+        //move to -1, -2
+        if (x >= 2 && y >= 1) {
+            if (!containsPiece(turnPlayerPieces, positions[x-1][y-2])) {
+                moves.add(new Move(x, y, x-1, y-2));
+            }
+        }
+        //move to 1, -2
+        if (x <= 1 && y >= 2) {
+            if (!containsPiece(turnPlayerPieces, positions[x+1][y-2])) {
+                moves.add(new Move(x, y, x+1, y-2));
+            }
+        }
+        //move to 2, -1
+        if (x <= 2 && y >= 1) {
+            if (!containsPiece(turnPlayerPieces, positions[x+2][y-1])) {
+                moves.add(new Move(x, y, x+2, y-1));
+            }
+        }
+        //move to 2, 1
+        if (x <= 2 && y <= 1) {
+            if (!containsPiece(turnPlayerPieces, positions[x+2][y+1])) {
+                moves.add(new Move(x, y, x+2, y+1));
+            }
+        }
+        //move to 1, -2
+        if (x <= 1 && y >= 2) {
+            if (!containsPiece(turnPlayerPieces, positions[x+1][y-2])) {
+                moves.add(new Move(x, y, x+1, y-2));
+            }
+        }
+        //move to -1, -2
+        if (x >= 1 && y >= 2) {
+            if (!containsPiece(turnPlayerPieces, positions[x-1][y-2])) {
+                moves.add(new Move(x, y, x-1, y-2));
+            }
+        }
+        //move to -2, 1
+        if (x >= 2 && y <= 1) {
+            if (!containsPiece(turnPlayerPieces, positions[x-2][y+1])) {
+                moves.add(new Move(x, y, x-2, y+1));
             }
         }
 
@@ -600,7 +641,7 @@ public class BoardState  implements Serializable {
         //normal moves
         for (int moveX : seqX) {
             for (int moveY : seqY) {
-                if (positions[moveX][moveY] == 0) {
+                if (positions[x+moveX][y+moveY] == 0) {
                     moves.add(new Move(x, y, moveX, moveY));
                 }
             }

@@ -1,8 +1,39 @@
 package atomicai;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Scanner;
 
 public class Tests {
+
+    private static Scanner scanner;
+    static {
+        scanner = new Scanner(System.in);
+    }
+    private static ArrayList<String> notationLetters;
+    static {
+        notationLetters = new ArrayList<String>();
+        notationLetters.add("A");
+        notationLetters.add("B");
+        notationLetters.add("C");
+        notationLetters.add("D");
+        notationLetters.add("E");
+        notationLetters.add("F");
+        notationLetters.add("G");
+        notationLetters.add("H");
+    }
+    private static HashMap<String, Integer> toIndexBased;
+    static {
+        toIndexBased = new HashMap<String, Integer>();
+        toIndexBased.put("A", 0);
+        toIndexBased.put("B", 1);
+        toIndexBased.put("C", 2);
+        toIndexBased.put("D", 3);
+        toIndexBased.put("E", 4);
+        toIndexBased.put("F", 5);
+        toIndexBased.put("G", 6);
+        toIndexBased.put("H", 7);
+    }
 
     public static void main(String[] args) {
         testBoard();
@@ -11,9 +42,69 @@ public class Tests {
 
     public static void testBoard() {
         BoardState b = new BoardState();
+        Move nextMove;
         b.setupInitialBoard();
-        b.printBoard();
+        while (true) {
+            b.printBoard();
+            if (b.checkVictory()) { break; }
+            //get a valid move from the player from the console
+            nextMove = getPlayerInput();
+            if (!b.moveAndPassTurn(nextMove)) {
+                System.out.println("invalid move?!");
+            }
+            System.out.println();
+        }
         return;
+    }
+
+    private static Move getPlayerInput() {
+        String playerInput;
+        //the place of the substring for the given input
+        String s1;
+        String s2;
+        String s3;
+        String s4;
+        String s5;
+        //the substring that should be able to be converted to ints
+        int i1;
+        int i2;
+        while (true) {
+            playerInput = scanner.nextLine();
+            if (playerInput.length() == 5) {
+                s1 = playerInput.substring(0, 1).toUpperCase();
+                s2 = playerInput.substring(1, 2).toUpperCase();
+                s3 = playerInput.substring(2, 3).toUpperCase();
+                s4 = playerInput.substring(3, 4).toUpperCase();
+                s5 = playerInput.substring(4, 5).toUpperCase();
+                try {
+                    i1 = Integer.parseInt(s2);
+                    i2 = Integer.parseInt(s5);
+                }
+                catch (NumberFormatException e) {
+                    System.out.println("invalid input, wrong numbers.");
+                    continue;
+                }
+                if (notationLetters.contains(s1) &&
+                    i1 >= 1 &&
+                    i1 <= 8 &&
+                    s3.equals(" ") &&
+                    i2 >= 1 &&
+                    i2 <= 8 &&
+                    notationLetters.contains(s4)) {
+                        //convert to index based notation
+                        return new Move(toIndexBased.get(s1), 8-i1, toIndexBased.get(s4), 8-i2);
+                    }
+                    System.out.println("invalid input, wrong format.");
+                    /*System.out.println(notationLetters.contains(s1));
+                    System.out.println(i1 >= 1);
+                    System.out.println(i1 <= 8);
+                    System.out.println(s3.equals(" "));
+                    System.out.println(i2 >= 1);
+                    System.out.println(i2 <= 8);
+                    System.out.println(notationLetters.contains(s4));
+                    System.out.println("got: " + s1 + i1 + s3 + s4 + i2);*/
+            }
+        }
     }
 
     public static void runAllTests() {
