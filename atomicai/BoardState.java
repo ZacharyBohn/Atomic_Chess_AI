@@ -735,7 +735,9 @@ public class BoardState  implements Serializable {
             Move move = new Move(x, y, cursorX, cursorY);
             moves.add(move);
             //can't skip over opponent's piece
-            if (positions[x][y] != 0) { break; }
+            if (positions[cursorX][cursorY] != 0) { break; }
+            cursorX = cursorX + dirX;
+            cursorY = cursorY + dirY;
         }
 
         return moves;

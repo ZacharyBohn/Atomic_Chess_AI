@@ -564,7 +564,7 @@ public class Tests {
         BoardState boardState = new BoardState();
         boardState.positions = new int[8][8];
         boardState.positions[0][0] = 8;
-        boardState.generateValidMoves(true);
+        boardState.generateValidMoves(false);
         if (boardState.validMoves.size() != 14) {
             return false;
         }
@@ -577,7 +577,7 @@ public class Tests {
         BoardState boardState = new BoardState();
         boardState.positions = new int[8][8];
         boardState.positions[4][3] = 9;
-        boardState.generateValidMoves(true);
+        boardState.generateValidMoves(false);
         if (boardState.validMoves.size() != 8) {
             return false;
         }
@@ -590,7 +590,7 @@ public class Tests {
         BoardState boardState = new BoardState();
         boardState.positions = new int[8][8];
         boardState.positions[1][1] = 10;
-        boardState.generateValidMoves(true);
+        boardState.generateValidMoves(false);
         if (boardState.validMoves.size() != 9) {
             return false;
         }
@@ -603,7 +603,7 @@ public class Tests {
         BoardState boardState = new BoardState();
         boardState.positions = new int[8][8];
         boardState.positions[0][0] = 12;
-        boardState.generateValidMoves(true);
+        boardState.generateValidMoves(false);
         if (boardState.validMoves.size() != 21) {
             return false;
         }
