@@ -31,6 +31,7 @@ public class BoardState  implements Serializable {
     public boolean blackRook7Moved;
     public Move lastMove;
     public boolean validMovesGenerated;
+    public boolean currentlyGeneratingValidMoves;
     //only used to determine if a piece is black or white
     public static int[] whitePieces;
     public static int[] blackPieces;
@@ -82,6 +83,7 @@ public class BoardState  implements Serializable {
         blackRook0Moved = false;
         blackRook7Moved = false;
         validMovesGenerated = false;
+        currentlyGeneratingValidMoves = false;
         return;
     }
 
@@ -148,6 +150,7 @@ public class BoardState  implements Serializable {
         if (containsMove(validMoves, move)) {
             move(move);
             whitesTurn = !whitesTurn;
+            validMovesGenerated = false;
             return true;
         }
         return false;
@@ -162,12 +165,12 @@ public class BoardState  implements Serializable {
         //move piece from oldX, oldY to newX, newY
         //this does not take into account legality
 
-        boolean opposingPieces = (
-            containsPiece(whitePieces, positions[oldX][oldY]) ==
-            containsPiece(blackPieces, positions[newX][newY]));
+        
+        boolean opposingPieces = opposingPieces(oldX, oldY, newX, newY);
 
         if (opposingPieces) { explode(newX, newY); }
         else {
+            //apply the actual move
             positions[newX][newY] = positions[oldX][oldY];
             //apply castling if applicable
             //white queen side castle: 4,7 - 2,7
@@ -210,6 +213,18 @@ public class BoardState  implements Serializable {
         if (oldX == 7 && oldY == 0) { blackRook7Moved = true; }
 
         return;
+    }
+
+    private boolean opposingPieces(int fromX, int fromY, int toX, int toY) {
+
+        //check if either space is empty
+        if (positions[fromX][fromY] == 0 || positions[toX][toY] == 0) {
+            return false;
+        }
+
+        return (
+            containsPiece(whitePieces, positions[fromX][fromY]) ==
+            containsPiece(whitePieces, positions[toX][toY]));
     }
 
     public BoardState branch(Move branchingMove) {
@@ -387,6 +402,8 @@ public class BoardState  implements Serializable {
 
     public void generateValidMoves(boolean removeSuicideMoves) {
         //generate all valid moves for the turn player
+        if (validMovesGenerated) { return; }
+        currentlyGeneratingValidMoves = true;
         validMoves = new ArrayList<Move>();
 
         int[] turnPlayerPieces = new int[6];
@@ -404,7 +421,8 @@ public class BoardState  implements Serializable {
 
         if (removeSuicideMoves) { removeSuicideMoves(validMoves); }
         validMovesGenerated = true;
-
+        currentlyGeneratingValidMoves = false;
+    
         return;
     }
 
@@ -418,6 +436,7 @@ public class BoardState  implements Serializable {
         for (Move m : moves) {
             nextMove = new BoardState();
             copyTo(nextMove);
+            nextMove.currentlyGeneratingValidMoves = true;
             nextMove.move(m);
             if (nextMove.kingAlive(nextMove.whitesTurn)) {
                 if (!nextMove.inCheck() || nextMove.kingAlive(!nextMove.whitesTurn)) {

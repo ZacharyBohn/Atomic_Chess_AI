@@ -36,8 +36,8 @@ public class Tests {
     }
 
     public static void main(String[] args) {
-        testBoard();
-        //runAllTests();
+        //testBoard();
+        runAllTests();
     }
 
     public static void testBoard() {
@@ -92,7 +92,9 @@ public class Tests {
                     i2 <= 8 &&
                     notationLetters.contains(s4)) {
                         //convert to index based notation
-                        return new Move(toIndexBased.get(s1), 8-i1, toIndexBased.get(s4), 8-i2);
+                        Move m = new Move(toIndexBased.get(s1), 8-i1, toIndexBased.get(s4), 8-i2);
+                        m.show();
+                        return m;
                     }
                     System.out.println("invalid input, wrong format.");
                     /*System.out.println(notationLetters.contains(s1));
@@ -398,7 +400,7 @@ public class Tests {
         BoardState boardState = new BoardState();
         boardState.positions = new int[8][8];
         //there should be no valid moves before any pieces are on the board
-        boardState.generateValidMoves();
+        boardState.generateValidMoves(true);
         if (boardState.validMoves.size() != 0) {
             return false;
         }
@@ -412,7 +414,7 @@ public class Tests {
         //there should be 2 moves for the pawn
         //and 14 moves for the rook
         boardState.whitesTurn = true;
-        boardState.generateValidMoves();
+        boardState.generateValidMoves(true);
         if (boardState.validMoves.size() != 14) {
             return false;
         }
@@ -430,7 +432,7 @@ public class Tests {
         boardState.positions[4][7] = 0;
         boardState.positions[7][3] = 11;
         boardState.whitesTurn = false;
-        boardState.generateValidMoves();
+        boardState.generateValidMoves(true);
         //move pawn up once
         Move suicideMove1 = new Move(3, 1, 3, 2);
         //move pawn up twice
@@ -529,7 +531,7 @@ public class Tests {
         boardState.positions[0][2] = 6;
         //create something for the black pawn to attack
         boardState.positions[1][3] = 12;
-        boardState.generateValidMoves();
+        boardState.generateValidMoves(true);
         //create the two valid moves for the white pawn
         Move move1 = new Move(0, 6, 0, 5);
         Move move2 = new Move(0, 6, 0, 4);
@@ -555,7 +557,7 @@ public class Tests {
         BoardState boardState = new BoardState();
         boardState.positions = new int[8][8];
         boardState.positions[0][0] = 8;
-        boardState.generateValidMoves();
+        boardState.generateValidMoves(true);
         if (boardState.validMoves.size() != 14) {
             return false;
         }
@@ -568,7 +570,7 @@ public class Tests {
         BoardState boardState = new BoardState();
         boardState.positions = new int[8][8];
         boardState.positions[4][3] = 9;
-        boardState.generateValidMoves();
+        boardState.generateValidMoves(true);
         if (boardState.validMoves.size() != 8) {
             return false;
         }
@@ -581,7 +583,7 @@ public class Tests {
         BoardState boardState = new BoardState();
         boardState.positions = new int[8][8];
         boardState.positions[1][1] = 10;
-        boardState.generateValidMoves();
+        boardState.generateValidMoves(true);
         if (boardState.validMoves.size() != 9) {
             return false;
         }
@@ -594,7 +596,7 @@ public class Tests {
         BoardState boardState = new BoardState();
         boardState.positions = new int[8][8];
         boardState.positions[0][0] = 12;
-        boardState.generateValidMoves();
+        boardState.generateValidMoves(true);
         if (boardState.validMoves.size() != 21) {
             return false;
         }
@@ -607,7 +609,7 @@ public class Tests {
         BoardState boardState = new BoardState();
         boardState.positions = new int[8][8];
         boardState.positions[3][3] = 11;
-        boardState.generateValidMoves();
+        boardState.generateValidMoves(true);
         if (boardState.validMoves.size() != 8) {
             return false;
         }

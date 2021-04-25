@@ -28,9 +28,9 @@ public class Move {
     }
 
     public void show() {
-
-        //show the move in a friendly way
-        //index cords need to be converted to chess notation
+        
+        System.out.println("Move from: " + fromX + ", " + fromY);
+        System.out.println("To: " + toX + ", " + toY);
 
         return;
     }
