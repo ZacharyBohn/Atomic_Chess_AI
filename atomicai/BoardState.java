@@ -436,7 +436,6 @@ public class BoardState  implements Serializable {
         for (Move m : moves) {
             nextMove = new BoardState();
             copyTo(nextMove);
-            nextMove.currentlyGeneratingValidMoves = true;
             nextMove.move(m);
             if (nextMove.kingAlive(nextMove.whitesTurn)) {
                 if (!nextMove.inCheck() || nextMove.kingAlive(!nextMove.whitesTurn)) {
@@ -661,7 +660,7 @@ public class BoardState  implements Serializable {
         for (int moveX : seqX) {
             for (int moveY : seqY) {
                 if (positions[x+moveX][y+moveY] == 0) {
-                    moves.add(new Move(x, y, moveX, moveY));
+                    moves.add(new Move(x, y, x+moveX, y+moveY));
                 }
             }
         }
@@ -709,7 +708,7 @@ public class BoardState  implements Serializable {
                 if (positions[7][0] == 1 &&
                     !blackRook7Moved &&
                     !opponentMoveTo(5, 0) &&
-                    opponentMoveTo(6, 0) &&
+                    !opponentMoveTo(6, 0) &&
                     positions[5][0] == 0 &&
                     positions[6][0] == 0) {
                         moves.add(new Move(x, y, 6, 0));
@@ -727,13 +726,12 @@ public class BoardState  implements Serializable {
         int[] turnPlayerPieces;
         if (whitesTurn) { turnPlayerPieces = whitePieces; }
         else { turnPlayerPieces = blackPieces; }
-        int pieceId = positions[x][y];
         int cursorX = x + dirX;
         int cursorY = y + dirY;
         while (true) {
             if (cursorX < 0 || cursorX > 7) { break; }
             if (cursorY < 0 || cursorY > 7) { break; }
-            if (containsPiece(turnPlayerPieces, pieceId)) { break; }
+            if (containsPiece(turnPlayerPieces, positions[cursorX][cursorY])) { break; }
             Move move = new Move(x, y, cursorX, cursorY);
             moves.add(move);
             //can't skip over opponent's piece

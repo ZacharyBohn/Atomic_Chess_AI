@@ -218,20 +218,21 @@ public class Tests {
             boardState.positions[0][0] != 1  ||
             boardState.positions[1][0] != 2  ||
             boardState.positions[2][0] != 3  ||
-            boardState.positions[3][0] != 4  ||
-            boardState.positions[4][0] != 5  ||
+            boardState.positions[3][0] != 5  ||
+            boardState.positions[4][0] != 4  ||
             boardState.positions[5][0] != 3  ||
             boardState.positions[6][0] != 2  ||
             boardState.positions[7][0] != 1  ||
             boardState.positions[0][7] != 8  ||
             boardState.positions[1][7] != 9  ||
             boardState.positions[2][7] != 10 ||
-            boardState.positions[3][7] != 11 ||
-            boardState.positions[4][7] != 12 ||
+            boardState.positions[3][7] != 12 ||
+            boardState.positions[4][7] != 11 ||
             boardState.positions[5][7] != 10 ||
             boardState.positions[6][7] != 9  ||
             boardState.positions[7][7] != 8
             ) {
+                System.out.println("Reason: back row pieces out of order");
                 return false;
             }
 
@@ -240,6 +241,7 @@ public class Tests {
             if (
                 boardState.positions[x][1] != 6 ||
                 boardState.positions[x][6] != 7) {
+                    System.out.println("Reason: pawns out of order");
                     return false;
                 }
         }
@@ -248,6 +250,7 @@ public class Tests {
         for (int x=0; x<8; x++) {
             for (int y=2; y<6; y++) {
                 if (boardState.positions[x][y] != 0) {
+                    System.out.println("Reason: not all empty spaces are empty");
                     return false;
                 }
             }
@@ -400,8 +403,9 @@ public class Tests {
         BoardState boardState = new BoardState();
         boardState.positions = new int[8][8];
         //there should be no valid moves before any pieces are on the board
-        boardState.generateValidMoves(true);
+        boardState.generateValidMoves(false);
         if (boardState.validMoves.size() != 0) {
+            System.out.println("Reason: valid moves generated on empty board");
             return false;
         }
         
@@ -414,8 +418,11 @@ public class Tests {
         //there should be 2 moves for the pawn
         //and 14 moves for the rook
         boardState.whitesTurn = true;
-        boardState.generateValidMoves(true);
-        if (boardState.validMoves.size() != 14) {
+        boardState.validMovesGenerated = false;
+        boardState.generateValidMoves(false);
+        int moveCount = boardState.validMoves.size();
+        if (moveCount != 16) {
+            System.out.println("Reason: expected 16 moves, got " + moveCount);
             return false;
         }
 
