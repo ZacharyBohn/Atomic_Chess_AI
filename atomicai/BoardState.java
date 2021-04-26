@@ -414,12 +414,12 @@ public class BoardState  implements Serializable {
         for (int x=0; x<8; x++) {
             for (int y=0; y<8; y++) {
                 if (containsPiece(turnPlayerPieces, positions[x][y])) {
-                    for (Move m : createMoves(x, y)) { validMoves.add(m); }
+                    for (Move m : createMoves(x, y, removeSuicideMoves)) { validMoves.add(m); }
                 }
             }
         }
 
-        if (removeSuicideMoves) { removeSuicideMoves(validMoves); }
+        if (removeSuicideMoves) { validMoves = removeSuicideMoves(validMoves); }
         validMovesGenerated = true;
         currentlyGeneratingValidMoves = false;
     
@@ -438,7 +438,13 @@ public class BoardState  implements Serializable {
             copyTo(nextMove);
             nextMove.move(m);
             if (nextMove.kingAlive(nextMove.whitesTurn)) {
-                if (!nextMove.inCheck() || nextMove.kingAlive(!nextMove.whitesTurn)) {
+                //the move is invalid if it places the turn player's king in
+                //check.  However, if it explodes the enemy king, then the move
+                //is valid even if the turn player is in check
+                //
+                //if the turn player is not in check OR the enemy king is killed
+                //then the move is valid, add it
+                if (!nextMove.inCheck() || !nextMove.kingAlive(!nextMove.whitesTurn)) {
                     trueValidMoves.add(m);
                 }
             }
@@ -447,7 +453,7 @@ public class BoardState  implements Serializable {
         return trueValidMoves;
     }
 
-    public ArrayList<Move> createMoves(int x, int y) {
+    public ArrayList<Move> createMoves(int x, int y, boolean removeSuicideMoves) {
         //generate the moves for the piece at location x,y
         int pieceId = positions[x][y];
         //pawns 6, 7
@@ -459,7 +465,10 @@ public class BoardState  implements Serializable {
         //bishops 3, 10
         if (pieceId == 3 || pieceId == 10) { return bishopMoves(x, y); }
         //kings 4, 11
-        if (pieceId == 1 || pieceId == 11) { return kingMoves(x, y); }
+        //if we don't care about removing suicide moves, then there's no
+        //need to create the king moves, since this king won't be able to
+        //attack the opponent king
+        if ((pieceId == 4 || pieceId == 11) && removeSuicideMoves) { return kingMoves(x, y); }
         //queens 5, 12
         if (pieceId == 5 || pieceId == 12) { return queenMoves(x, y); }
         //default return value
@@ -557,34 +566,10 @@ public class BoardState  implements Serializable {
                 moves.add(new Move(x, y, x-2, y-1));
             }
         }
-        //move to -1, -2
-        if (x >= 2 && y >= 1) {
-            if (!containsPiece(turnPlayerPieces, positions[x-1][y-2])) {
-                moves.add(new Move(x, y, x-1, y-2));
-            }
-        }
-        //move to 1, -2
-        if (x <= 1 && y >= 2) {
-            if (!containsPiece(turnPlayerPieces, positions[x+1][y-2])) {
-                moves.add(new Move(x, y, x+1, y-2));
-            }
-        }
-        //move to 2, -1
-        if (x <= 2 && y >= 1) {
-            if (!containsPiece(turnPlayerPieces, positions[x+2][y-1])) {
-                moves.add(new Move(x, y, x+2, y-1));
-            }
-        }
-        //move to 2, 1
-        if (x <= 2 && y <= 1) {
-            if (!containsPiece(turnPlayerPieces, positions[x+2][y+1])) {
-                moves.add(new Move(x, y, x+2, y+1));
-            }
-        }
-        //move to 1, -2
-        if (x <= 1 && y >= 2) {
-            if (!containsPiece(turnPlayerPieces, positions[x+1][y-2])) {
-                moves.add(new Move(x, y, x+1, y-2));
+        //move to -2, 1
+        if (x >= 2 && y <= 6) {
+            if (!containsPiece(turnPlayerPieces, positions[x-2][y+1])) {
+                moves.add(new Move(x, y, x-2, y+1));
             }
         }
         //move to -1, -2
@@ -593,10 +578,34 @@ public class BoardState  implements Serializable {
                 moves.add(new Move(x, y, x-1, y-2));
             }
         }
-        //move to -2, 1
-        if (x >= 2 && y <= 1) {
-            if (!containsPiece(turnPlayerPieces, positions[x-2][y+1])) {
-                moves.add(new Move(x, y, x-2, y+1));
+        //move to -1, 2
+        if (x >= 1 && y <= 5) {
+            if (!containsPiece(turnPlayerPieces, positions[x-1][y+2])) {
+                moves.add(new Move(x, y, x-1, y+2));
+            }
+        }
+        //move to 1, -2
+        if (x <= 6 && y >= 2) {
+            if (!containsPiece(turnPlayerPieces, positions[x+1][y-2])) {
+                moves.add(new Move(x, y, x+1, y-2));
+            }
+        }
+        //move to 1, 2
+        if (x <= 6 && y <= 5) {
+            if (!containsPiece(turnPlayerPieces, positions[x+1][y+2])) {
+                moves.add(new Move(x, y, x+1, y+2));
+            }
+        }
+        //move to 2, -1
+        if (x <= 5 && y >= 1) {
+            if (!containsPiece(turnPlayerPieces, positions[x+2][y-1])) {
+                moves.add(new Move(x, y, x+2, y-1));
+            }
+        }
+        //move to 2, 1
+        if (x <= 5 && y <= 6) {
+            if (!containsPiece(turnPlayerPieces, positions[x+2][y+1])) {
+                moves.add(new Move(x, y, x+2, y+1));
             }
         }
 
@@ -649,6 +658,8 @@ public class BoardState  implements Serializable {
         ArrayList<Move> moves = new ArrayList<Move>();
         ArrayList<Integer> seqX = new ArrayList<Integer>();
         ArrayList<Integer> seqY = new ArrayList<Integer>();
+        seqX.add(0);
+        seqY.add(0);
         //this avoids out of index error for positions if the
         //king is on the side of the board
         if (x != 0) { seqX.add(-1); }

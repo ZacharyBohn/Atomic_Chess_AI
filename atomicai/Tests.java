@@ -436,20 +436,24 @@ public class Tests {
         //move the white queen to a position that pins a
         //black pawn to the black king
         //white queen = 11
-        boardState.positions[4][7] = 0;
-        boardState.positions[7][3] = 11;
+        boardState.positions[3][7] = 0;
+        boardState.positions[7][3] = 12;
         boardState.whitesTurn = false;
         boardState.generateValidMoves(true);
         //move pawn up once
-        Move suicideMove1 = new Move(3, 1, 3, 2);
+        Move suicideMove1 = new Move(5, 1, 5, 2);
         //move pawn up twice
-        Move suicideMove2 = new Move(3, 1, 3, 3);
+        Move suicideMove2 = new Move(5, 1, 5, 3);
         if (boardState.containsMove(boardState.validMoves, suicideMove1) ||
             boardState.containsMove(boardState.validMoves, suicideMove2)) {
+                System.out.println("Reason: contained suicide move");
                 return false;
             }
         //there should now be 17 moves left that are valid for black
-        if (boardState.validMoves.size() != 17) {
+        int size = boardState.validMoves.size();
+        if (size != 17) {
+            System.out.println("Reason: didn't contain all other valid moves");
+            System.out.println("Expected 17, got " + size);
             return false;
         }
 
@@ -485,19 +489,24 @@ public class Tests {
             for (int y=0; y<8; y++) {
                 //check if the current square should be movable to by black
                 if (x == 1 && y == 6 && boardState.opponentMoveTo(x, y) == false) {
+                    System.out.println("Reason: black isnt able to move to 1, 6");
                     return false;
                 }
                 else if (x == 2 && y == 0 && boardState.opponentMoveTo(x, y) == false) {
+                    System.out.println("Reason: black isnt able to move to 2, 0");
                     return false;
                 }
                 else if (x == 1 && y == 1 && boardState.opponentMoveTo(x, y) == false) {
+                    System.out.println("Reason: black isnt able to move to 1, 1");
                     return false;
                 }
                 else if (x == 0 && y == 1 && boardState.opponentMoveTo(x, y) == false) {
+                    System.out.println("Reason: black isnt able to move to 0, 1");
                     return false;
                 }
                 else if (boardState.opponentMoveTo(x, y) == true) {
                     //black should NOT be able to move here
+                    System.out.println("Reason: black is able to move to " + x + ", " + y);
                     return false;
                 }
             }
@@ -576,6 +585,7 @@ public class Tests {
 
         BoardState boardState = new BoardState();
         boardState.positions = new int[8][8];
+        //white knight id: 9
         boardState.positions[4][3] = 9;
         boardState.generateValidMoves(false);
         if (boardState.validMoves.size() != 8) {
